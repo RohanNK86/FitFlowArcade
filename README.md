@@ -1,4 +1,4 @@
-🛍️ E-Commerce Website
+🛍️ E-Commerce Website - FitFlow
 
 A modern, responsive E-Commerce website built using HTML, CSS, and JavaScript.
 The project focuses on performance optimization, responsive design, and modern UI aesthetics.
