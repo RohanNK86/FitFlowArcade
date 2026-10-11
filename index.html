@@ -20,6 +20,24 @@
     <!-- ════════════════ TOAST NOTIFICATION ════════════════ -->
     <div id="toast" class="toast" aria-live="polite"></div>
 
+    <!-- ════════════════ PROMO POPUP BANNER ════════════════ -->
+    <div id="promoOverlay" class="promo-overlay">
+        <div class="promo-popup">
+            <button class="promo-close" id="promoClose" aria-label="Close">&times;</button>
+            <div class="promo-badge">LIMITED OFFER</div>
+            <div class="promo-icon">🛍️</div>
+            <h2 class="promo-title">Exclusive Deal!</h2>
+            <p class="promo-subtitle">Shop for <strong>₹1000</strong> or more and get</p>
+            <div class="promo-discount">FLAT ₹299 OFF</div>
+            <p class="promo-terms">Use code at checkout &bull; Valid today only</p>
+            <div class="promo-code-box">
+                <span class="promo-code">SAVE299</span>
+                <button class="promo-copy-btn" id="promoCopyBtn">Copy</button>
+            </div>
+            <button class="promo-cta" id="promoShopNow">Shop Now</button>
+        </div>
+    </div>
+
     <!-- ════════════════ NAVBAR ════════════════ -->
     <header class="navbar" id="navbar">
         <div class="nav-container">
@@ -358,7 +376,22 @@
                 <div class="order-summary">
                     <h4>Order Summary</h4>
                     <div id="orderSummaryItems"></div>
-                    <div class="order-total">Total: <strong id="orderTotal">₹0</strong></div>
+                    <div class="coupon-section" id="couponSection">
+                        <label for="couponInput">Have a coupon?</label>
+                        <div class="coupon-row">
+                            <input type="text" id="couponInput" placeholder="Enter code e.g. SAVE299" autocomplete="off" />
+                            <button type="button" class="coupon-apply-btn" id="couponApplyBtn">Apply</button>
+                        </div>
+                        <div class="coupon-feedback" id="couponFeedback"></div>
+                    </div>
+                    <div class="order-total-rows">
+                        <div class="order-total-row" id="couponDiscountRow" style="display:none;">
+                            <span>Coupon Discount</span>
+                            <span class="coupon-discount-amt" id="couponDiscountAmt">−₹0</span>
+                            <button type="button" class="coupon-remove-btn" id="couponRemoveBtn">✕ Remove</button>
+                        </div>
+                        <div class="order-total">Total: <strong id="orderTotal">₹0</strong></div>
+                    </div>
                 </div>
                 <button type="submit" class="btn-primary checkout-submit">Place Order ✦</button>
             </form>

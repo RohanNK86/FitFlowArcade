@@ -1,4 +1,42 @@
 'use strict';
+
+/* ── PROMO POPUP ─────────────────────────────────── */
+(function () {
+    const overlay = document.getElementById('promoOverlay');
+    const closeBtn = document.getElementById('promoClose');
+    const copyBtn = document.getElementById('promoCopyBtn');
+    const shopBtn = document.getElementById('promoShopNow');
+
+    function closePopup() {
+        overlay.classList.add('hidden');
+    }
+
+    // Show popup after 1.5 seconds
+    setTimeout(() => {
+        if (overlay) overlay.classList.remove('hidden');
+    }, 1500);
+
+    if (closeBtn) closeBtn.addEventListener('click', closePopup);
+    if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closePopup(); });
+
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText('SAVE299').then(() => {
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+            });
+        });
+    }
+
+    if (shopBtn) {
+        shopBtn.addEventListener('click', () => {
+            closePopup();
+            document.querySelector('#men, #women, #new')?.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+})();
+/* ── END PROMO POPUP ─────────────────────────────── */
+
 const products = [
     {
         id: 1,
@@ -781,19 +819,92 @@ accountForm.addEventListener('submit', async event => {
 function openCheckout() {
     const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const delivery = subtotal >= 999 ? 0 : 79;
-    const grand = subtotal + delivery;
+    const discount = (appliedCoupon && subtotal >= appliedCoupon.minOrder) ? appliedCoupon.discount : 0;
+    const grand = subtotal + delivery - discount;
+    return { subtotal, delivery, discount, grand };
+}
+
+function updateCheckoutTotal() {
+    const { delivery, discount, grand } = getCheckoutTotals();
+    const couponDiscountRow = document.getElementById('couponDiscountRow');
+    const couponDiscountAmt = document.getElementById('couponDiscountAmt');
+    const orderTotalEl = document.getElementById('orderTotal');
+    if (discount > 0) {
+        couponDiscountRow.style.display = 'flex';
+        couponDiscountAmt.textContent = `−₹${discount.toLocaleString('en-IN')}`;
+    } else {
+        couponDiscountRow.style.display = 'none';
+    }
+    orderTotalEl.textContent = `₹${grand.toLocaleString('en-IN')}`;
+}
+
+function openCheckout() {
+    appliedCoupon = null;
+    const { subtotal, delivery } = getCheckoutTotals();
 
     orderSummaryItems.innerHTML = cart.map(i =>
         `<div class="order-summary-item"><span>${i.name} × ${i.qty} (${i.size})</span><span>₹${(i.price * i.qty).toLocaleString('en-IN')}</span></div>`
     ).join('')
         + `<div class="order-summary-item"><span>Delivery</span><span>${delivery === 0 ? 'FREE' : '₹' + delivery}</span></div>`;
 
-    orderTotalEl.textContent = `₹${grand.toLocaleString('en-IN')}`;
+    // Reset coupon UI
+    const couponInput = document.getElementById('couponInput');
+    const couponFeedback = document.getElementById('couponFeedback');
+    const couponDiscountRow = document.getElementById('couponDiscountRow');
+    if (couponInput) couponInput.value = '';
+    if (couponFeedback) { couponFeedback.textContent = ''; couponFeedback.className = 'coupon-feedback'; }
+    if (couponDiscountRow) couponDiscountRow.style.display = 'none';
+
+    updateCheckoutTotal();
     checkoutModal.style.display = 'block';
     checkoutOverlay.style.display = 'block';
     checkoutForm.style.display = 'flex';
     orderSuccess.style.display = 'none';
     document.body.style.overflow = 'hidden';
+
+    // Coupon Apply
+    const couponApplyBtn = document.getElementById('couponApplyBtn');
+    const couponRemoveBtn = document.getElementById('couponRemoveBtn');
+
+    if (couponApplyBtn) {
+        couponApplyBtn.onclick = () => {
+            const code = couponInput.value.trim().toUpperCase();
+            const coupon = VALID_COUPONS[code];
+            const { subtotal } = getCheckoutTotals();
+            if (!code) {
+                couponFeedback.textContent = '⚠ Please enter a coupon code.';
+                couponFeedback.className = 'coupon-feedback error';
+            } else if (!coupon) {
+                couponFeedback.textContent = '✕ Invalid coupon code.';
+                couponFeedback.className = 'coupon-feedback error';
+            } else if (subtotal < coupon.minOrder) {
+                couponFeedback.textContent = `⚠ Add items worth ₹${coupon.minOrder} or more to use this coupon.`;
+                couponFeedback.className = 'coupon-feedback error';
+            } else if (appliedCoupon) {
+                couponFeedback.textContent = '⚠ A coupon is already applied. Remove it first.';
+                couponFeedback.className = 'coupon-feedback error';
+            } else {
+                appliedCoupon = coupon;
+                couponFeedback.textContent = `✔ Coupon "${code}" applied! You save ₹${coupon.discount}.`;
+                couponFeedback.className = 'coupon-feedback success';
+                couponInput.disabled = true;
+                couponApplyBtn.disabled = true;
+                updateCheckoutTotal();
+            }
+        };
+    }
+
+    if (couponRemoveBtn) {
+        couponRemoveBtn.onclick = () => {
+            appliedCoupon = null;
+            couponInput.value = '';
+            couponInput.disabled = false;
+            couponApplyBtn.disabled = false;
+            couponFeedback.textContent = 'Coupon removed.';
+            couponFeedback.className = 'coupon-feedback';
+            updateCheckoutTotal();
+        };
+    }
 }
 
 window.closeCheckout = function () {
