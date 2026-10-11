@@ -1,6 +1,4 @@
 'use strict';
-
-/* ── PRODUCT DATA ──────────────────────────── */
 const products = [
     // ── MEN ──
     {
