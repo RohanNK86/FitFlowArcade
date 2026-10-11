@@ -1,6 +1,5 @@
 'use strict';
 const products = [
-    // ── MEN ──
     {
         id: 1,
         name: 'Camel Wool Overshirt Jacket',
@@ -278,9 +277,7 @@ const navLinks = document.getElementById('navLinks');
 const navbar = document.getElementById('navbar');
 const toast = document.getElementById('toast');
 
-/* ══════════════════════════════════════════
-   RENDER
-   ══════════════════════════════════════════ */
+
 function getStars(rating) {
     const filled = Math.floor(rating);
     const half = rating % 1 >= 0.5 ? 1 : 0;
