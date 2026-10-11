@@ -217,6 +217,80 @@ const products = [
         isNew: true,
         description: 'A dark brown cropped faux-leather oversized jacket over a white tee, worn with ultra-wide-leg dark navy denim jeans. Street-style perfection — finished with black shades and a mini bag.',
         tags: ['new']
+    },
+
+    // ── KIDS 10–18 ──
+    {
+        id: 13,
+        name: 'Sky Blue Varsity Co-ord',
+        brand: 'YoungForm',
+        category: 'kids',
+        image: 'https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=700&q=85',
+        price: 1499,
+        originalPrice: 2199,
+        sizes: ['10Y', '12Y', '14Y', '16Y', '18Y'],
+        outOfStock: [],
+        rating: 4.8,
+        ratingCount: 164,
+        badge: 'new',
+        badgeText: 'NEW IN',
+        isNew: true,
+        description: 'A relaxed sky-blue varsity jacket and jogger co-ord designed for school days, weekend plans, and easy everyday layering.',
+        tags: ['new', 'kids']
+    },
+    {
+        id: 14,
+        name: 'Everyday Denim Street Set',
+        brand: 'NextMode',
+        category: 'kids',
+        image: 'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&w=700&q=85',
+        price: 1699,
+        originalPrice: 2499,
+        sizes: ['10Y', '12Y', '14Y', '16Y', '18Y'],
+        outOfStock: [],
+        rating: 4.7,
+        ratingCount: 128,
+        badge: 'sale',
+        badgeText: '32% OFF',
+        isNew: false,
+        description: 'A soft graphic tee layered under a classic denim jacket with relaxed trousers — a confident street-style look for ages 10 to 18.',
+        tags: ['sale', 'kids']
+    },
+    {
+        id: 15,
+        name: 'Lilac Weekend Hoodie Set',
+        brand: 'CloudNine Juniors',
+        category: 'kids',
+        image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=700&q=85',
+        price: 1299,
+        originalPrice: 1899,
+        sizes: ['10Y', '12Y', '14Y', '16Y', '18Y'],
+        outOfStock: [],
+        rating: 4.9,
+        ratingCount: 209,
+        badge: 'hot',
+        badgeText: '🔥 FAVOURITE',
+        isNew: true,
+        description: 'A cosy lilac hoodie and jogger set with a clean silhouette, made for travel days, after-school comfort, and relaxed weekends.',
+        tags: ['new', 'kids', 'sale']
+    },
+    {
+        id: 16,
+        name: 'Terracotta Smart Casual Edit',
+        brand: 'Little Atelier',
+        category: 'kids',
+        image: 'https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?auto=format&fit=crop&w=700&q=85',
+        price: 1899,
+        originalPrice: 2699,
+        sizes: ['10Y', '12Y', '14Y', '16Y', '18Y'],
+        outOfStock: [],
+        rating: 4.6,
+        ratingCount: 97,
+        badge: 'sale',
+        badgeText: '30% OFF',
+        isNew: false,
+        description: 'A polished terracotta overshirt paired with neutral trousers for family occasions, celebrations, and smart-casual days.',
+        tags: ['sale', 'kids']
     }
 ];
 
@@ -276,6 +350,8 @@ const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('navLinks');
 const navbar = document.getElementById('navbar');
 const toast = document.getElementById('toast');
+const kidsShopBtn = document.getElementById('kidsShopBtn');
+const kidsLookCards = document.querySelectorAll('.kids-look-card');
 
 
 function getStars(rating) {
@@ -399,6 +475,20 @@ function attachCardListeners() {
         card.addEventListener('click', () => openModal(+card.dataset.id));
     });
 }
+
+function selectCategory(category) {
+    activeCategory = category;
+    document.querySelectorAll('.cat-chip').forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.cat === category);
+    });
+    renderProducts();
+    document.getElementById('shop').scrollIntoView({ behavior: 'smooth' });
+}
+
+kidsShopBtn?.addEventListener('click', () => selectCategory('kids'));
+kidsLookCards.forEach(card => {
+    card.addEventListener('click', () => openModal(Number(card.dataset.kidsLook)));
+});
 
 /* ══════════════════════════════════════════
    QUICK VIEW MODAL
