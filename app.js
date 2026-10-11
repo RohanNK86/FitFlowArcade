@@ -390,6 +390,23 @@ const navbar = document.getElementById('navbar');
 const toast = document.getElementById('toast');
 const kidsShopBtn = document.getElementById('kidsShopBtn');
 const kidsLookCards = document.querySelectorAll('.kids-look-card');
+const accountBtn = document.getElementById('accountBtn');
+const accountModal = document.getElementById('accountModal');
+const accountOverlay = document.getElementById('accountOverlay');
+const accountClose = document.getElementById('accountClose');
+const accountForm = document.getElementById('accountForm');
+const accountNameGroup = document.getElementById('accountNameGroup');
+const accountName = document.getElementById('accountName');
+const accountEmail = document.getElementById('accountEmail');
+const accountPassword = document.getElementById('accountPassword');
+const accountTitle = document.getElementById('accountTitle');
+const accountMessage = document.getElementById('accountMessage');
+const accountSubmit = document.getElementById('accountSubmit');
+const accountSwitch = document.getElementById('accountSwitch');
+const accountOrders = document.getElementById('accountOrders');
+let accountMode = 'register';
+let currentUser = JSON.parse(localStorage.getItem('fitflow_user') || 'null');
+let authToken = localStorage.getItem('fitflow_token') || '';
 
 
 function getStars(rating) {
@@ -722,15 +739,84 @@ cartOverlay.addEventListener('click', closeCart);
    ══════════════════════════════════════════ */
 checkoutBtn.addEventListener('click', () => {
     if (!cart.length) return;
+    if (!authToken) {
+        openAccount('register');
+        showToast('Register or log in before checkout');
+        return;
+    }
     closeCart();
     openCheckout();
 });
 
-/* ── COUPON STATE ─────────────────────────── */
-const VALID_COUPONS = { 'SAVE299': { discount: 299, minOrder: 1000, label: 'SAVE299' } };
-let appliedCoupon = null;
+function openAccount(mode = accountMode) {
+    accountMode = mode;
+    const loggedIn = Boolean(authToken && currentUser);
+    accountForm.style.display = loggedIn ? 'none' : 'flex';
+    accountOrders.style.display = loggedIn ? 'block' : 'none';
+    accountNameGroup.style.display = mode === 'register' ? 'flex' : 'none';
+    accountName.required = mode === 'register';
+    accountTitle.textContent = loggedIn ? `Hi, ${currentUser.name}` : mode === 'register' ? 'Create your account' : 'Welcome back';
+    accountMessage.textContent = loggedIn ? 'Your recent orders and tracking details.' : 'Register to place and track your orders.';
+    accountSubmit.textContent = mode === 'register' ? 'Register' : 'Log in';
+    accountSwitch.textContent = mode === 'register' ? 'Already have an account? Log in' : 'New here? Create an account';
+    accountModal.style.display = 'block';
+    accountOverlay.style.display = 'block';
+    if (loggedIn) loadOrders();
+}
 
-function getCheckoutTotals() {
+function closeAccount() {
+    accountModal.style.display = 'none';
+    accountOverlay.style.display = 'none';
+}
+
+async function apiRequest(endpoint, options = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (authToken) headers.Authorization = `Bearer ${authToken}`;
+    const response = await fetch(endpoint, { ...options, headers });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Request failed');
+    return data;
+}
+
+async function loadOrders() {
+    try {
+        const data = await apiRequest('/api/orders');
+        accountOrders.innerHTML = data.orders.length
+            ? data.orders.map(order => `<div class="account-order"><strong>${order.id}</strong><br>Status: ${order.status}<br>Total: ₹${order.total.toLocaleString('en-IN')}</div>`).join('')
+            : '<p>No orders yet.</p>';
+    } catch (error) {
+        accountOrders.textContent = error.message;
+    }
+}
+
+accountBtn.addEventListener('click', () => openAccount());
+accountClose.addEventListener('click', closeAccount);
+accountOverlay.addEventListener('click', closeAccount);
+accountSwitch.addEventListener('click', () => openAccount(accountMode === 'register' ? 'login' : 'register'));
+
+accountForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    try {
+        const data = await apiRequest(`/api/${accountMode}`, {
+            method: 'POST',
+            body: JSON.stringify({
+                name: accountName.value,
+                email: accountEmail.value,
+                password: accountPassword.value
+            })
+        });
+        currentUser = data.user;
+        authToken = data.token;
+        localStorage.setItem('fitflow_user', JSON.stringify(currentUser));
+        localStorage.setItem('fitflow_token', authToken);
+        closeAccount();
+        showToast(`Welcome, ${currentUser.name}!`);
+    } catch (error) {
+        showToast(error.message);
+    }
+});
+
+function openCheckout() {
     const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const delivery = subtotal >= 999 ? 0 : 79;
     const discount = (appliedCoupon && subtotal >= appliedCoupon.minOrder) ? appliedCoupon.discount : 0;
@@ -830,19 +916,37 @@ window.closeCheckout = function () {
 checkoutClose.addEventListener('click', closeCheckout);
 checkoutOverlay.addEventListener('click', closeCheckout);
 
-checkoutForm.addEventListener('submit', e => {
+checkoutForm.addEventListener('submit', async e => {
     e.preventDefault();
-    // Simulate order placement
-    cart = [];
-    appliedCoupon = null;
-    saveCart();
-    updateCartCount();
-    renderCart();
-    checkoutForm.style.display = 'none';
-    orderSuccess.style.display = 'flex';
-    orderSuccess.style.flexDirection = 'column';
-    orderSuccess.style.alignItems = 'center';
-    showToast('🎉 Order placed successfully!');
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const delivery = subtotal >= 999 ? 0 : 79;
+    try {
+        const data = await apiRequest('/api/orders', {
+            method: 'POST',
+            body: JSON.stringify({
+                items: cart,
+                total: subtotal + delivery,
+                customer: {
+                    name: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`.trim(),
+                    phone: document.getElementById('phone').value,
+                    address: document.getElementById('address').value,
+                    payment: document.getElementById('payment').value
+                }
+            })
+        });
+        document.querySelector('#orderSuccess p').textContent = `Order ${data.order.id} is confirmed. Track it from your Account.`;
+        cart = [];
+        saveCart();
+        updateCartCount();
+        renderCart();
+        checkoutForm.style.display = 'none';
+        orderSuccess.style.display = 'flex';
+        orderSuccess.style.flexDirection = 'column';
+        orderSuccess.style.alignItems = 'center';
+        showToast('🎉 Order placed successfully!');
+    } catch (error) {
+        showToast(error.message);
+    }
 });
 
 /* ══════════════════════════════════════════

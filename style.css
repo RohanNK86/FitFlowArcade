@@ -499,6 +499,20 @@ textarea {
     background: var(--glass-bg);
 }
 
+.account-btn {
+    color: var(--text-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.account-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-violet);
+}
+
 .cart-count {
     position: absolute;
     top: 2px;
@@ -1878,6 +1892,53 @@ textarea {
     z-index: 1600;
     padding: 32px;
     border-radius: var(--radius-xl) !important;
+}
+
+.account-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+    z-index: 1500;
+}
+
+.account-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(440px, 96vw);
+    max-height: 92vh;
+    overflow-y: auto;
+    z-index: 1600;
+    padding: 32px;
+    border-radius: var(--radius-xl) !important;
+}
+
+.account-inner h2 {
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 8px;
+}
+
+.account-inner > p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 22px;
+}
+
+.account-switch {
+    color: var(--accent-cyan);
+    font-size: 0.8rem;
+    margin-top: 18px;
+}
+
+.account-order {
+    margin-top: 16px;
+    padding: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    font-size: 0.82rem;
 }
 
 .checkout-inner>h2 {

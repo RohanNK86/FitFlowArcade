@@ -33,6 +33,21 @@ Responsive design techniques
 
 Lazy loading optimization
 
+## Demo backend
+
+Run the local backend with:
+
+```bash
+npm start
+```
+
+Open `http://localhost:3000`, register an account, add a product to the cart,
+and place an order. The **Account** button lists the user's orders and tracking
+status. Demo orders move from **confirmed** to **packed**, **out for delivery**,
+and **delivered** every 15 seconds so the flow can be tested without a payment
+or delivery service. Users and orders are stored in `data/store.json`, which is
+created automatically and ignored by Git.
+
 🎨 UI / Design
 
 The UI follows a modern minimalist design approach featuring:

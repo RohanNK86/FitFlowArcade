@@ -1,0 +1,13 @@
+{
+  "name": "fitflow-store",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FITFLOW storefront and demo order backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
